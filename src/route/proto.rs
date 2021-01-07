@@ -1,6 +1,9 @@
 
 use actix_protobuf::*;
 use actix_web::*;
+use prost::Message;
+
+use crate::items;
 
 #[derive(Clone, PartialEq, Message)]
 pub struct MyObj {
@@ -13,7 +16,10 @@ pub struct MyObj {
 
 pub async fn protobuf(msg: ProtoBuf<MyObj>) -> Result<HttpResponse> {
     println!("model: {:?}", msg);
-    HttpResponse::Ok().protobuf(msg.0) // <- send response
+    HttpResponse::Ok().protobuf(items::Shirt{
+        color: "red".to_string(),
+        size: 1
+    }) // <- send response
 }
 
 
@@ -35,6 +41,10 @@ mod tests {
             _ => panic!("Response error"),
         };
         println!("{:?}", response_body);
+
+
+        let r = items::Shirt::decode(&response_body[..]).unwrap();
+        println!("{:?}", r);
         assert_eq!(resp.status(), http::StatusCode::OK);
     }
 }
